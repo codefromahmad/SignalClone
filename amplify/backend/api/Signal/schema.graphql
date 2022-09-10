@@ -1,0 +1,37 @@
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+type Message @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  content: String
+  image: String
+  audio: String
+  status: MessageStatus
+  replyToMessageID: ID
+  userID: ID! @index(name: "byUser")
+  chatroomID: ID! @index(name: "byChatRoom")
+}
+
+type ChatRoom @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  newMessages: Int
+  name: String
+  imageUri: String
+  ChatRoomUsers: [User] @manyToMany(relationName: "ChatRoomUser")
+  LastMessage: Message @hasOne
+  Messages: [Message] @hasMany(indexName: "byChatRoom", fields: ["id"])
+  Admin: User @hasOne
+}
+
+type User @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  imageUri: String
+  status: String
+  lastOnlineAt: AWSTimestamp
+  Messages: [Message] @hasMany(indexName: "byUser", fields: ["id"])
+  chatrooms: [ChatRoom] @manyToMany(relationName: "ChatRoomUser")
+}
